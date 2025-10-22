@@ -1,6 +1,7 @@
 import argparse
 from scapy.all import sniff, Ether, IP, TCP, UDP, wrpcap
 from datetime import datetime
+import time
 
 def format_payload(payload, length=16):
     raw_bytes = bytes(payload)[:length]
@@ -79,6 +80,20 @@ def packet_callback_factory(packets, log_path, verbose):
         log_packet(packet, log_path)
     return packet_callback
 
+def show_banner(duration=3):
+    banner = [
+        "===============================",
+        "       Sniffer tool v1.0       ",
+        "   Starting capture shortly...  ",
+        "==============================="
+    ]
+    print("\n".join(banner))
+    # simple countdown
+    for s in range(duration, 0, -1):
+        print(f"Starting in {s}...", end="\r", flush=True)
+        time.sleep(1)
+    print(" " * 40, end="\r")  # clear line
+
 def main():
     parser = argparse.ArgumentParser(
         description="Simple Scapy packet sniffer",
@@ -100,6 +115,9 @@ def main():
     packets = []
     callback = packet_callback_factory(packets, args.log, args.verbose)
 
+    # show banner and short delay before starting capture
+    show_banner(duration=3)
+    
     sniff_kwargs = {
         "prn": callback,
         "count": args.count,
